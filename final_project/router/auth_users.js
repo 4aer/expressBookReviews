@@ -27,7 +27,7 @@ const authenticatedUser = (username, password) => {
   return user !== undefined;
 }
 
-// Only registered users can login
+// Task 7: Only registered users can login
 regd_users.post("/login", (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -78,7 +78,7 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-// Add or modify a book review (authenticated users only)
+// Task 8: Add or modify a book review (authenticated users only)
 regd_users.put("/auth/review/:isbn", verifyToken, (req, res) => {
   const isbn = req.params.isbn;
   const review = req.body.review;
@@ -108,7 +108,7 @@ regd_users.put("/auth/review/:isbn", verifyToken, (req, res) => {
   });
 });
 
-// Delete a book review (authenticated users only)
+// Task 9: Delete a book review (authenticated users only)
 regd_users.delete("/auth/review/:isbn", verifyToken, (req, res) => {
   const isbn = req.params.isbn;
   const username = req.user.username;

@@ -1,8 +1,14 @@
 const express = require('express');
+// Load env for PORT
+require('dotenv').config();
+const axios = require('axios');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
+
+const PORT = process.env.PORT || 5000;
+const BASE_URL = `http://localhost:${PORT}`;
 
 
 // Task 6: Register a new user
@@ -100,3 +106,53 @@ public_users.get('/review/:isbn', function (req, res) {
 });
 
 module.exports.general = public_users;
+
+// --- Axios-based example routes (Tasks 10-13) ---
+// These call the existing public endpoints via HTTP using Axios
+// Task 10: Get book list using Promise callbacks
+public_users.get('/axios/books', (req, res) => {
+  axios.get(`${BASE_URL}/`)
+    .then(response => {
+      // response.data may already be JSON or a string depending on the original handler
+      return res.status(response.status).json({ data: response.data });
+    })
+    .catch(error => {
+      const status = error.response ? error.response.status : 500;
+      return res.status(status).json({ message: 'Failed to fetch book list', error: error.message });
+    });
+});
+
+// Task 11: Get book details by ISBN using async/await
+public_users.get('/axios/isbn/:isbn', async (req, res) => {
+  const isbn = req.params.isbn;
+  try {
+    const response = await axios.get(`${BASE_URL}/isbn/${encodeURIComponent(isbn)}`);
+    return res.status(response.status).json(response.data);
+  } catch (error) {
+    const status = error.response ? error.response.status : 500;
+    return res.status(status).json({ message: 'Failed to fetch book by ISBN', error: error.message });
+  }
+});
+
+// Task 12: Get book details by author using Promise callbacks
+public_users.get('/axios/author/:author', (req, res) => {
+  const author = req.params.author;
+  axios.get(`${BASE_URL}/author/${encodeURIComponent(author)}`)
+    .then(response => res.status(response.status).json(response.data))
+    .catch(error => {
+      const status = error.response ? error.response.status : 500;
+      return res.status(status).json({ message: 'Failed to fetch books by author', error: error.message });
+    });
+});
+
+// Task 13: Get book details by title using async/await
+public_users.get('/axios/title/:title', async (req, res) => {
+  const title = req.params.title;
+  try {
+    const response = await axios.get(`${BASE_URL}/title/${encodeURIComponent(title)}`);
+    return res.status(response.status).json(response.data);
+  } catch (error) {
+    const status = error.response ? error.response.status : 500;
+    return res.status(status).json({ message: 'Failed to fetch books by title', error: error.message });
+  }
+});
